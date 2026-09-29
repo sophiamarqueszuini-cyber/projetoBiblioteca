@@ -1,0 +1,31 @@
+SISTEMA DE BIBLIOTECA - ASP.NET Core MVC (.NET 10) + MySQL (sem Entity Framework)
+Versao 2 - acervo normalizado (autores, generos, editoras) e emprestimo com varios livros
+==================================================================================
+
+1) Banco de dados
+   - Abra o MySQL Workbench e execute o arquivo BancoDeDados/biblioteca_db.sql inteiro.
+   - Ele cria o banco biblioteca_db, as 8 tabelas, os dados de exemplo e as 50 stored procedures.
+   - Se voce ja tinha o banco da versao 1, rode o script novo inteiro (ele recria o banco).
+   - O diagrama do banco esta em BancoDeDados/DER_biblioteca_db.png
+
+2) Projeto
+   - Abra projetoBiblioteca.slnx no Visual Studio.
+   - Confira a senha do MySQL em projetoBiblioteca/Data/DataBase.cs (padrao: root / 123456789).
+   - O pacote NuGet MySql.Data e restaurado automaticamente no primeiro build.
+   - F5 para executar (ou run_biblioteca.bat). Endereco: http://localhost:5190
+
+3) Acesso inicial
+   - Login: admin   Senha: admin123   (perfil Administrador)
+
+Perfis
+   - Administrador: cadastra Administradores, Gerentes e Bibliotecarios.
+   - Gerente: cadastra somente Bibliotecarios.
+   - Bibliotecario: nao cadastra usuarios; gerencia livros, leitores e emprestimos.
+
+Regras
+   - Um emprestimo pode ter varios livros. Prazo = 7 dias, prorrogavel UMA vez por mais 1 dia.
+   - A devolucao pode ser livro a livro (tela Detalhes) ou de todos de uma vez.
+   - Livros usam autor, genero e editora cadastrados em Acervo (chaves estrangeiras).
+   - Exclusoes sao logicas (status = 0). Registros excluidos podem ser reativados.
+
+Veja o passo a passo completo em Tutorial_Sistema_Biblioteca.docx.

@@ -1,0 +1,74 @@
+@model List<Usuario>
+@{
+    ViewData["Title"] = "Usuários";
+    int status = ViewBag.Status;
+    List<string> permitidos = ViewBag.PerfisPermitidos;
+    int logadoId = ViewBag.UsuarioLogadoId;
+}
+
+<h2>Usuários do sistema @(status == 0 ? "(excluidos)" : "")</h2>
+
+<div class="mb-3">
+    @if (status == 1)
+    {
+        <a asp-action="Cadastrar" class="btn btn-primary">Cadastrar novo usuário</a>
+        <a asp-action="Index" asp-route-status="0" class="btn btn-outline-secondary">Ver excluídos</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="btn btn-outline-secondary">Voltar para ativos</a>
+    }
+</div>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Login</th>
+            <th>Perfil</th>
+            <th>Cadastrado em</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            var podeGerenciar = permitidos.Contains(u.Perfil);
+            <tr>
+                <td>@u.Nome @if (u.Id == logadoId) { <span class="badge bg-info">você</span> }</td>
+                <td>@u.Login</td>
+                <td>
+                    <span class="badge @(u.Perfil == Perfis.Administrador ? "bg-danger" : u.Perfil == Perfis.Gerente ? "bg-warning text-dark" : "bg-primary")">@u.Perfil</span>
+                </td>
+                <td>@u.DataCadastro.ToString("dd/MM/yyyy")</td>
+                <td class="text-end text-nowrap">
+                    @if (podeGerenciar && status == 1)
+                    {
+                        <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-warning">Editar</a>
+                        @if (u.Id != logadoId)
+                        {
+                            <form asp-action="Delete" asp-route-id="@u.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Deseja realmente excluir este usuário?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                            </form>
+                        }
+                    }
+                    else if (podeGerenciar && status == 0)
+                    {
+                        <form asp-action="Reativar" asp-route-id="@u.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success">Reativar</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <small class="text-muted">sem permissão</small>
+                    }
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="5" class="text-center text-muted">Nenhum usuário encontrado.</td></tr>
+        }
+    </tbody>
+</table>

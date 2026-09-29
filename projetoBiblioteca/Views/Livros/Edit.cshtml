@@ -1,0 +1,64 @@
+@model Livro
+@{
+    ViewData["Title"] = "Editar Livro";
+}
+
+<h2>Editar Livro</h2>
+<p class="text-muted">Disponíveis agora: @Model.QuantidadeDisponivel de @Model.QuantidadeTotal. Ao alterar a quantidade total, a disponivel acompanha a diferenca.</p>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="row">
+        <div class="col-md-8 mb-3">
+            <label asp-for="Titulo" class="form-label"></label>
+            <input asp-for="Titulo" class="form-control" />
+            <span asp-validation-for="Titulo" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Isbn" class="form-label"></label>
+            <input asp-for="Isbn" class="form-control" />
+            <span asp-validation-for="Isbn" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="AutorId" class="form-label"></label>
+            <select asp-for="AutorId" asp-items="ViewBag.Autores" class="form-select">
+                <option value="0">-- selecione o autor --</option>
+            </select>
+            <span asp-validation-for="AutorId" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="EditoraId" class="form-label"></label>
+            <select asp-for="EditoraId" asp-items="ViewBag.Editoras" class="form-select">
+                <option value="0">-- selecione a editora --</option>
+            </select>
+            <span asp-validation-for="EditoraId" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="GeneroId" class="form-label"></label>
+            <select asp-for="GeneroId" asp-items="ViewBag.Generos" class="form-select">
+                <option value="0">-- selecione o gênero --</option>
+            </select>
+            <span asp-validation-for="GeneroId" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="AnoPublicacao" class="form-label"></label>
+            <input asp-for="AnoPublicacao" class="form-control" />
+            <span asp-validation-for="AnoPublicacao" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="QuantidadeTotal" class="form-label"></label>
+            <input asp-for="QuantidadeTotal" class="form-control" />
+            <span asp-validation-for="QuantidadeTotal" class="text-danger"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    <p class="text-muted small mt-3">Não encontrou o autor, gênero ou editora? Cadastre em <a asp-controller="Autores" asp-action="Cadastrar">Autores</a>, <a asp-controller="Generos" asp-action="Cadastrar">Gêneros</a> ou <a asp-controller="Editoras" asp-action="Cadastrar">Editoras</a>.</p>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

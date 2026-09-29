@@ -1,0 +1,87 @@
+@model List<Emprestimo>
+@{
+    ViewData["Title"] = "Empréstimos";
+    string filtro = ViewBag.Filtro;
+    var filtros = new Dictionary<string, string>
+    {
+        { "abertos", "Em aberto" },
+        { "atrasados", "Atrasados" },
+        { "devolvidos", "Devolvidos" },
+        { "todos", "Todos" }
+    };
+}
+
+<h2>Empréstimos</h2>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a asp-action="Cadastrar" class="btn btn-primary">Novo empréstimo</a>
+    <div class="btn-group ms-auto">
+        @foreach (var f in filtros)
+        {
+            <a asp-action="Index" asp-route-filtro="@f.Key"
+               class="btn @(filtro == f.Key ? "btn-dark" : "btn-outline-dark")">@f.Value</a>
+        }
+    </div>
+</div>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Nº</th>
+            <th>Leitor</th>
+            <th>Livros</th>
+            <th>Emprestado em</th>
+            <th>Devolver até</th>
+            <th>Situação</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            var cor = e.Devolvido ? "bg-secondary" : e.Atrasado ? "bg-danger" : e.Prorrogado ? "bg-warning text-dark" : "bg-success";
+            <tr>
+                <td>@e.Id</td>
+                <td>@e.LeitorNome</td>
+                <td style="max-width:320px">
+                    <small>@e.Livros</small>
+                    @if (!e.Devolvido && e.QtdPendentes < e.QtdLivros)
+                    {
+                        <div><span class="badge bg-info text-dark">@(e.QtdLivros - e.QtdPendentes) de @e.QtdLivros devolvido(s)</span></div>
+                    }
+                </td>
+                <td>@e.DataEmprestimo.ToString("dd/MM/yyyy")</td>
+                <td>@(e.Devolvido ? e.DataDevolucao!.Value.ToString("dd/MM/yyyy") + " (devolvido)" : e.DataPrevistaDevolucao.ToString("dd/MM/yyyy"))</td>
+                <td>
+                    <span class="badge @cor">@e.Situacao</span>
+                    @if (e.Atrasado) { <small class="text-danger d-block">@e.DiasAtraso dia(s)</small> }
+                </td>
+                <td class="text-end text-nowrap">
+                    <a asp-action="Detalhes" asp-route-id="@e.Id" class="btn btn-sm btn-outline-primary">Detalhes</a>
+                    @if (!e.Devolvido)
+                    {
+                        <form asp-action="Devolver" asp-route-id="@e.Id" asp-route-filtro="@filtro" method="post" class="d-inline"
+                              onsubmit="return confirm('Confirmar a devolução de TODOS os livros pendentes deste empréstimo?');">
+                            <button type="submit" class="btn btn-sm btn-success">Devolver tudo</button>
+                        </form>
+                    }
+                    @if (e.PodeProrrogar)
+                    {
+                        <form asp-action="Prorrogar" asp-route-id="@e.Id" asp-route-filtro="@filtro" method="post" class="d-inline"
+                              onsubmit="return confirm('Prorrogar por mais @Emprestimo.DiasProrrogacao @(Emprestimo.DiasProrrogacao == 1 ? "dia" : "dias")?');">
+                            <button type="submit" class="btn btn-sm btn-warning">Prorrogar +@Emprestimo.DiasProrrogacao</button>
+                        </form>
+                    }
+                    <form asp-action="Delete" asp-route-id="@e.Id" asp-route-filtro="@filtro" method="post" class="d-inline"
+                          onsubmit="return confirm('Deseja realmente excluir este empréstimo?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="7" class="text-center text-muted">Nenhum empréstimo encontrado.</td></tr>
+        }
+    </tbody>
+</table>

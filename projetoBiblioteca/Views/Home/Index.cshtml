@@ -1,0 +1,71 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Início";
+}
+
+<h2 class="mb-4">Olá, @Context.Session.GetString(SessionKeys.UsuarioNome)!</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md">
+        <div class="card text-bg-primary h-100"><div class="card-body">
+            <div class="small">Títulos no acervo</div>
+            <div class="fs-2 fw-bold">@Model.TotalLivros</div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card text-bg-success h-100"><div class="card-body">
+            <div class="small">Exemplares disponíveis</div>
+            <div class="fs-2 fw-bold">@Model.ExemplaresDisponiveis</div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card text-bg-secondary h-100"><div class="card-body">
+            <div class="small">Leitores</div>
+            <div class="fs-2 fw-bold">@Model.TotalLeitores</div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card text-bg-info h-100"><div class="card-body">
+            <div class="small">Empréstimos em aberto</div>
+            <div class="fs-2 fw-bold">@Model.EmprestimosAbertos</div>
+        </div></div>
+    </div>
+    <div class="col-12 col-md">
+        <div class="card text-bg-danger h-100"><div class="card-body">
+            <div class="small">Empréstimos atrasados</div>
+            <div class="fs-2 fw-bold">@Model.EmprestimosAtrasados</div>
+        </div></div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <a asp-controller="Emprestimos" asp-action="Cadastrar" class="btn btn-primary">Novo empréstimo</a>
+    <a asp-controller="Livros" asp-action="Cadastrar" class="btn btn-outline-primary">Cadastrar livro</a>
+    <a asp-controller="Leitores" asp-action="Cadastrar" class="btn btn-outline-primary">Cadastrar leitor</a>
+</div>
+
+<h4>Empréstimos atrasados</h4>
+@if (Model.Atrasados.Count == 0)
+{
+    <p class="text-muted">Nenhum empréstimo atrasado. &#128077;</p>
+}
+else
+{
+    <table class="table table-sm table-striped">
+        <thead>
+            <tr><th>Nº</th><th>Leitor</th><th>Livros</th><th>Previsto para</th><th>Dias de atraso</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.Atrasados)
+            {
+                <tr>
+                    <td><a asp-controller="Emprestimos" asp-action="Detalhes" asp-route-id="@e.Id">@e.Id</a></td>
+                    <td>@e.LeitorNome</td>
+                    <td><small>@e.Livros</small></td>
+                    <td>@e.DataPrevistaDevolucao.ToString("dd/MM/yyyy")</td>
+                    <td class="text-danger fw-bold">@e.DiasAtraso</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

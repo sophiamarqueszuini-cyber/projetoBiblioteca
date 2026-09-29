@@ -1,0 +1,86 @@
+@model Emprestimo
+@{
+    ViewData["Title"] = "Empréstimo nº " + Model.Id;
+    var cor = Model.Devolvido ? "bg-secondary" : Model.Atrasado ? "bg-danger" : Model.Prorrogado ? "bg-warning text-dark" : "bg-success";
+}
+
+<div class="d-flex align-items-center gap-3 mb-3">
+    <h2 class="mb-0">Empréstimo nº @Model.Id</h2>
+    <span class="badge fs-6 @cor">@Model.Situacao</span>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4"><div class="text-muted small">Leitor</div><div class="fw-bold">@Model.LeitorNome</div></div>
+            <div class="col-md-4"><div class="text-muted small">Atendido por</div><div>@Model.UsuarioNome</div></div>
+            <div class="col-md-4"><div class="text-muted small">Livros</div><div>@Model.QtdLivros (@Model.QtdPendentes pendente(s))</div></div>
+            <div class="col-md-4"><div class="text-muted small">Emprestado em</div><div>@Model.DataEmprestimo.ToString("dd/MM/yyyy")</div></div>
+            <div class="col-md-4">
+                <div class="text-muted small">Devolver até</div>
+                <div>@Model.DataPrevistaDevolucao.ToString("dd/MM/yyyy") @(Model.Prorrogado ? "(prorrogado)" : "")
+                    @if (Model.Atrasado) { <span class="text-danger fw-bold">- @Model.DiasAtraso dia(s) de atraso</span> }
+                </div>
+            </div>
+            <div class="col-md-4"><div class="text-muted small">Concluído em</div><div>@(Model.DataDevolucao?.ToString("dd/MM/yyyy") ?? "-")</div></div>
+        </div>
+    </div>
+</div>
+
+<h4>Livros deste empréstimo</h4>
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Devolvido em</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Itens)
+        {
+            <tr>
+                <td>@item.LivroTitulo</td>
+                <td>@item.AutorNome</td>
+                <td>
+                    @if (item.Devolvido)
+                    {
+                        <span class="badge bg-secondary">@item.DataDevolucao!.Value.ToString("dd/MM/yyyy")</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">pendente</span>
+                    }
+                </td>
+                <td class="text-end">
+                    @if (!item.Devolvido && Model.Status == 1)
+                    {
+                        <form asp-action="DevolverItem" asp-route-id="@item.Id" asp-route-emprestimoId="@Model.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Confirmar a devolução deste livro?');">
+                            <button type="submit" class="btn btn-sm btn-success">Devolver este livro</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex flex-wrap gap-2">
+    <a asp-action="Index" class="btn btn-secondary">Voltar para a lista</a>
+    @if (!Model.Devolvido && Model.Status == 1)
+    {
+        <form asp-action="Devolver" asp-route-id="@Model.Id" asp-route-voltar="detalhes" method="post" class="d-inline"
+              onsubmit="return confirm('Confirmar a devolução de TODOS os livros pendentes?');">
+            <button type="submit" class="btn btn-success">Devolver todos os pendentes</button>
+        </form>
+    }
+    @if (Model.PodeProrrogar && Model.Status == 1)
+    {
+        <form asp-action="Prorrogar" asp-route-id="@Model.Id" asp-route-voltar="detalhes" method="post" class="d-inline"
+              onsubmit="return confirm('Prorrogar por mais @Emprestimo.DiasProrrogacao @(Emprestimo.DiasProrrogacao == 1 ? "dia" : "dias")?');">
+            <button type="submit" class="btn btn-warning">Prorrogar +@Emprestimo.DiasProrrogacao @(Emprestimo.DiasProrrogacao == 1 ? "dia" : "dias")</button>
+        </form>
+    }
+</div>
